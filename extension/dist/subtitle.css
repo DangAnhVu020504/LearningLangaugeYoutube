@@ -1,0 +1,213 @@
+/* ============================================================================
+   Subtitle Overlay Styles - ChiHaiDaiCa Extension
+   ============================================================================
+   CSS cho phụ đề song ngữ đè lên YouTube Video Player.
+   
+   Design principles:
+   - Glassmorphism: backdrop-filter blur + transparency
+   - Micro-animations: smooth fade transitions
+   - Hover effects: từ vựng highlight khi hover
+   - Responsive: tự co giãn theo kích thước video player
+   - Không xung đột với YouTube CSS (prefix: chdc-)
+   ============================================================================ */
+
+/* ── Container chính ─────────────────────────────────────────────────────── */
+/* Đặt bên trong #movie_player, position absolute phía dưới video */
+
+.chdc-subtitle-container {
+  position: absolute;
+  bottom: 60px;              /* Trên thanh controls của YouTube (~48px) */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 900px;
+  z-index: 60;               /* Trên video, dưới YouTube controls (z-index: 63) */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  pointer-events: auto;      /* Cho phép hover/click vào từ */
+  user-select: none;          /* Ngăn select text khi double-click */
+
+  /* Transition mượt khi show/hide */
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.chdc-subtitle-container--visible {
+  opacity: 1;
+}
+
+/* ── Dòng phụ đề (áp dụng cho cả original và translation) ──────────────── */
+
+.chdc-subtitle-line {
+  /* Glassmorphism background */
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  padding: 8px 20px;
+  border-radius: 8px;
+
+  /* Text styling */
+  font-family: 'Inter', 'Roboto', 'Segoe UI', -apple-system, sans-serif;
+  line-height: 1.5;
+  text-align: center;
+  color: #ffffff;
+
+  /* Smooth content change */
+  transition: all 0.15s ease-out;
+
+  /* Cho phép wrap dài */
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* ── Dòng 1: Phụ đề gốc (Original) ────────────────────────────────────── */
+
+.chdc-subtitle-original {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Dòng 2: Phụ đề dịch (Translation) ─────────────────────────────────── */
+
+.chdc-subtitle-translation {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.82);
+  font-style: italic;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Từ vựng (Token spans) ──────────────────────────────────────────────── */
+
+.chdc-word {
+  display: inline;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 2px;
+  margin: 0 -2px;
+
+  /* Smooth hover transition */
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.chdc-word-space {
+  display: inline;
+}
+
+/* ── Hover state: highlight từ ──────────────────────────────────────────── */
+
+.chdc-word--hover {
+  background-color: rgba(255, 214, 0, 0.35);  /* Vàng nhẹ */
+  color: #FFD600;
+  border-radius: 3px;
+}
+
+/* ── Active/Click state: từ đang tra ────────────────────────────────────── */
+
+.chdc-word--active {
+  background-color: rgba(76, 175, 80, 0.45);  /* Xanh lá nhẹ */
+  color: #81C784;
+  border-radius: 3px;
+  outline: 1px solid rgba(76, 175, 80, 0.6);
+  outline-offset: 1px;
+}
+
+/* ── Tooltip tra từ (Phase 4 sẽ populate) ───────────────────────────────── */
+
+.chdc-word-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  min-width: 180px;
+  max-width: 320px;
+  
+  font-size: 14px;
+  color: #E0E0E0;
+  text-align: left;
+  white-space: normal;
+  
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  /* Animation: fade + slide up */
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+
+  z-index: 70;
+}
+
+.chdc-word-tooltip--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.chdc-word-tooltip__word {
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFD600;
+  margin-bottom: 4px;
+}
+
+.chdc-word-tooltip__meaning {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+.chdc-word-tooltip__context {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 6px;
+  font-style: italic;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 6px;
+}
+
+/* ── No subtitle message ────────────────────────────────────────────────── */
+
+.chdc-no-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+/* ── Fullscreen adjustments ─────────────────────────────────────────────── */
+
+:fullscreen .chdc-subtitle-container,
+:-webkit-full-screen .chdc-subtitle-container {
+  bottom: 80px;
+}
+
+:fullscreen .chdc-subtitle-original,
+:-webkit-full-screen .chdc-subtitle-original {
+  font-size: 26px;
+}
+
+:fullscreen .chdc-subtitle-translation,
+:-webkit-full-screen .chdc-subtitle-translation {
+  font-size: 20px;
+}
+
+/* ── Ẩn phụ đề gốc YouTube khi extension active ────────────────────────── */
+/* YouTube caption container */
+
+.chdc-active .ytp-caption-window-container {
+  display: none !important;
+}

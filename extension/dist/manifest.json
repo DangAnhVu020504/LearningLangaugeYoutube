@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "ChiHaiDaiCa",
+  "version": "0.1.0",
+  "description": "Học ngoại ngữ qua video YouTube với phụ đề song ngữ và từ điển hover thông minh.",
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["subtitle.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "icons": {},
+
+  "minimum_chrome_version": "110"
+}
