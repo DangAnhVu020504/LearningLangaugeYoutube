@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Learning App - Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Language Learning App</h1>
+        <p class="subtitle">Test Backend API Connection</p>
+
+        <div id="backendStatus" class="status info">
+            <strong>Backend Status:</strong> Đang kiểm tra...
+        </div>
+
+        <h3>Test API Endpoints:</h3>
+        
+        <div style="margin: 20px 0;">
+            <input 
+                type="text" 
+                id="videoId" 
+                class="input" 
+                placeholder="Nhập YouTube Video ID (vd: dQw4w9WgXcQ)"
+                value="dQw4w9WgXcQ"
+            >
+            <button class="btn" onclick="testTranscript()">
+                Test Transcript API
+            </button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <input 
+                type="text" 
+                id="word" 
+                class="input" 
+                placeholder="Nhập từ cần dịch"
+                value="hello"
+            >
+            <input 
+                type="text" 
+                id="context" 
+                class="input" 
+                placeholder="Nhập câu ngữ cảnh"
+                value="Hello world, how are you?"
+            >
+            <button class="btn" onclick="testTranslate()">
+                Test Translate API
+            </button>
+        </div>
+
+        <div id="result"></div>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+        <h3>Hướng dẫn:</h3>
+        <ol style="padding-left: 20px; color: #64748b; line-height: 1.8;">
+            <li>Backend đang chạy tại: <strong>http://localhost:3000/api</strong></li>
+            <li>Để sử dụng đầy đủ, bạn cần thêm API Key vào file <code>backend/.env</code></li>
+            <li>Mở file <code>backend/.env</code> và thêm:
+                <pre>OPENAI_API_KEY=sk-your-key-here</pre>
+            </li>
+            <li>Sau đó restart backend</li>
+        </ol>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        // Kiểm tra backend status
+        async function checkBackend() {
+            const statusDiv = document.getElementById('backendStatus');
+            try {
+                const response = await fetch(`${API_URL}/transcript?videoId=test&lang=en`);
+                if (response.ok || response.status === 500) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '<strong>✅ Backend Status:</strong> Đang chạy tốt!';
+                } else {
+                    throw new Error('Backend không phản hồi');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `<strong>❌ Backend Status:</strong> Không kết nối được. ${error.message}`;
+            }
+        }
+
+        // Test Transcript API
+        async function testTranscript() {
+            const videoId = document.getElementById('videoId').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="loading"></div> Đang lấy transcript...';
+            
+            try {
+                const response = await fetch(`${API_URL}/transcript?videoId=${videoId}&lang=en`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>✅ Thành công!</strong> Lấy được ${data.transcript.length} dòng phụ đề
+                        </div>
+                        <pre>${JSON.stringify(data.transcript.slice(0, 5), null, 2)}</pre>
+                        <p style="color: #64748b; margin-top: 10px;">Hiển thị 5 dòng đầu tiên...</p>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Lỗi không xác định');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        <strong>❌ Lỗi:</strong> ${error.message}
+                        <br><br>
+                        <strong>Lưu ý:</strong> Video phải có phụ đề (CC). Thử video ID khác hoặc kiểm tra console.
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        }
+
+        // Test Translate API
+        async function testTranslate() {
+            const word = document.getElementById('word').value;
+            const context = document.getElementById('context').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="loading"></div> Đang dịch từ...';
+            
+            try {
+                const response = await fetch(`${API_URL}/translate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        word: word,
+                        context: context,
+                        language: 'en'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>✅ Thành công!</strong>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">${data.word}</h3>
+                            <p><strong>Nghĩa:</strong> ${data.meaning}</p>
+                            ${data.grammar_note ? `<p><strong>Ngữ pháp:</strong> ${data.grammar_note}</p>` : ''}
+                            ${data.pronunciation ? `<p><strong>Phát âm:</strong> ${data.pronunciation}</p>` : ''}
+                            <p><strong>Ví dụ:</strong></p>
+                            <ul style="padding-left: 20px;">
+                                ${data.examples.map(ex => `<li>${ex}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Lỗi không xác định');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        <strong>❌ Lỗi:</strong> ${error.message}
+                        <br><br>
+                        <strong>Lưu ý:</strong> Bạn cần thêm API Key vào file backend/.env
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        }
+
+        // Kiểm tra backend khi load trang
+        checkBackend();
+    </script>
+</body>
+</html>
