@@ -17,6 +17,7 @@ export class LlmService {
     if (openaiKey) {
       this.openai = new OpenAI({
         apiKey: openaiKey,
+        baseURL: 'https://api.groq.com/openai/v1',
       });
     }
 
@@ -54,7 +55,7 @@ export class LlmService {
   private async generateWithOpenAI(prompt: string): Promise<string> {
     try {
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',  // Hoặc 'gpt-4' nếu có quyền
+        model: 'llama-3.1-8b-instant',  // Hoặc 'gpt-4' nếu có quyền
         messages: [
           {
             role: 'system',
@@ -83,11 +84,9 @@ export class LlmService {
     try {
       // Thử các model khả dụng theo thứ tự ưu tiên
       const modelNames = [
-        'gemini-1.5-flash-latest',
-        'gemini-1.5-pro-latest', 
         'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-pro',
+        'gemini-1.5-flash-8b', // Bản siêu nhẹ, dự phòng cực tốt cho dịch thuật
+        'gemini-1.0-pro'
       ];
 
       let lastError: Error | null = null;

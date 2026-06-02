@@ -6,5 +6,6 @@ import { LlmService } from './llm.service';
 @Module({
   controllers: [TranslateController],
   providers: [TranslateService, LlmService],
+  exports: [LlmService], // Export để modules khác có thể dùng
 })
 export class TranslateModule {}

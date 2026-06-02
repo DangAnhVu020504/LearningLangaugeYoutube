@@ -29,6 +29,9 @@ declare var YT: any;
             <option value="en">🇬🇧 English</option>
             <option value="zh">🇨🇳 中文</option>
             <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
           </select>
           <button class="btn btn-primary" (click)="loadVideo()" [disabled]="isLoading()">
             @if (isLoading()) {
@@ -51,8 +54,8 @@ declare var YT: any;
 
           <!-- Transcript & Translation -->
           <div class="transcript-section">
-            <div class="card">
-              <h3>📝 Phụ đề</h3>
+            <div class="card" style="height: 100%; display: flex; flex-direction: column; background: #0f0f0f; border: none;">
+              <h3 style="color: #f1f1f1; padding: 16px; margin: 0; border-bottom: 1px solid #272727;">📝 Phụ đề</h3>
               <div class="transcript-container">
                 @for (item of transcript(); track $index) {
                   <div 
@@ -67,6 +70,18 @@ declare var YT: any;
                         >{{ word }}</span>
                       }
                     </div>
+                    
+                    <!-- Hiển thị bản dịch cho TẤT CẢ phụ đề -->
+                    @if (transcriptTranslations().has($index)) {
+                      <div class="transcript-translation">
+                        🇻🇳 {{ transcriptTranslations().get($index) }}
+                      </div>
+                    } @else {
+                      <div class="transcript-translation-loading">
+                        <span class="loading-dots">⏳ Đang dịch...</span>
+                      </div>
+                    }
+                    
                     <div class="transcript-time">
                       {{ formatTime(item.start) }}
                     </div>
@@ -145,58 +160,132 @@ declare var YT: any;
   `,
   styles: [`
     .video-player-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #0f0f0f;
     }
 
     .video-content {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: 1fr 400px;
+      gap: 24px;
+      height: calc(100vh - 180px);
+      padding: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1400px) {
+      .video-content {
+        grid-template-columns: 1fr 350px;
+      }
     }
 
     @media (max-width: 968px) {
       .video-content {
         grid-template-columns: 1fr;
+        height: auto;
       }
+    }
+
+    .video-section {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     #youtube-player {
       width: 100%;
-      aspect-ratio: 16/9;
+      height: 0;
+      padding-bottom: 56.25%;
       background: #000;
-      border-radius: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #youtube-player iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .transcript-section {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .transcript-container {
-      max-height: 500px;
+      height: 100%;
       overflow-y: auto;
-      padding: 10px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .transcript-item {
       padding: 12px;
-      margin-bottom: 8px;
-      border-radius: 6px;
-      background: #f8fafc;
+      margin-bottom: 0;
+      border-radius: 8px;
+      background: #272727;
       cursor: pointer;
       transition: all 0.2s;
+      border: 2px solid transparent;
     }
 
     .transcript-item:hover {
-      background: #e2e8f0;
+      background: #3f3f3f;
     }
 
     .transcript-item.active {
-      background: #dbeafe;
-      border-left: 3px solid #2563eb;
+      background: #3f3f3f;
+      border-color: #2563eb;
     }
 
     .transcript-text {
       margin-bottom: 4px;
       line-height: 1.6;
+      color: #f1f1f1;
+      font-size: 14px;
+    }
+
+    .transcript-translation {
+      margin: 8px 0 4px 0;
+      padding: 8px;
+      background: rgba(37, 99, 235, 0.1);
+      border-left: 3px solid #2563eb;
+      border-radius: 4px;
+      color: #93c5fd;
+      font-size: 13px;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .transcript-translation-loading {
+      margin: 8px 0 4px 0;
+      padding: 8px;
+      background: rgba(148, 163, 184, 0.1);
+      border-left: 3px solid #64748b;
+      border-radius: 4px;
+      color: #94a3b8;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .loading-dots {
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .word {
@@ -206,15 +295,17 @@ declare var YT: any;
       border-radius: 3px;
       cursor: pointer;
       transition: background 0.2s;
+      color: #f1f1f1;
     }
 
     .word:hover {
-      background: #fef3c7;
+      background: #065fd4;
+      color: white;
     }
 
     .transcript-time {
-      font-size: 12px;
-      color: #64748b;
+      font-size: 11px;
+      color: #aaa;
     }
 
     .translation-popup {
@@ -340,6 +431,7 @@ export class VideoPlayerComponent implements OnDestroy {
   selectedLanguage = 'en';
   videoId = signal<string | null>(null);
   transcript = signal<TranscriptItem[]>([]);
+  transcriptTranslations = signal<Map<number, string>>(new Map()); // Lưu bản dịch của từng transcript item
   currentTranscriptIndex = signal<number>(-1);
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -350,6 +442,12 @@ export class VideoPlayerComponent implements OnDestroy {
   selectedContext = signal('');
   translation = signal<any>(null);
   isTranslating = signal(false);
+
+  // Progressive translation tracking
+  private translatingItems = new Set<number>();
+  private lastTranslatedIndex = -1; // Theo dõi item cuối đã dịch
+  private readonly INITIAL_BATCH = 20; // Dịch 20 câu đầu
+  private readonly PROGRESSIVE_BATCH = 10; // Dịch thêm 10 câu mỗi lần
 
   private player: any;
   private updateInterval: any;
@@ -396,6 +494,9 @@ export class VideoPlayerComponent implements OnDestroy {
       next: (response) => {
         this.transcript.set(response.transcript);
         this.isLoading.set(false);
+        
+        // Bắt đầu dịch 20 câu đầu tiên
+        this.translateInitialBatch();
       },
       error: (error) => {
         this.errorMessage.set(
@@ -429,27 +530,61 @@ export class VideoPlayerComponent implements OnDestroy {
    * Khởi tạo YouTube Player
    */
   private initYouTubePlayer(videoId: string): void {
+    console.log('🎬 Đang khởi tạo YouTube Player cho video:', videoId);
+    
     // Đợi YouTube API load xong
     if (typeof YT === 'undefined' || !YT.Player) {
+      console.log('⏳ Đợi YouTube API...');
       setTimeout(() => this.initYouTubePlayer(videoId), 100);
       return;
     }
 
     // Destroy player cũ nếu có
     if (this.player) {
-      this.player.destroy();
+      console.log('🗑️ Hủy player cũ');
+      try {
+        this.player.destroy();
+      } catch (e) {
+        console.warn('Lỗi khi destroy player:', e);
+      }
+      this.player = null;
     }
 
-    this.player = new YT.Player('youtube-player', {
-      videoId: videoId,
-      playerVars: {
-        autoplay: 0,
-        controls: 1,
-      },
-      events: {
-        onReady: () => this.startTimeTracking(),
-      },
-    });
+    // Đợi DOM element sẵn sàng
+    const element = document.getElementById('youtube-player');
+    if (!element) {
+      console.log('⏳ Đợi DOM element...');
+      setTimeout(() => this.initYouTubePlayer(videoId), 100);
+      return;
+    }
+
+    console.log('✅ Tạo YouTube Player mới');
+    try {
+      this.player = new YT.Player('youtube-player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            console.log('✅ YouTube Player sẵn sàng');
+            this.startTimeTracking();
+          },
+          onError: (event: any) => {
+            console.error('❌ Lỗi YouTube Player:', event.data);
+            this.errorMessage.set('Lỗi khi tải video. Vui lòng kiểm tra URL.');
+          },
+        },
+      });
+    } catch (error) {
+      console.error('❌ Lỗi khi tạo player:', error);
+      this.errorMessage.set('Không thể khởi tạo video player');
+    }
   }
 
   /**
@@ -469,7 +604,7 @@ export class VideoPlayerComponent implements OnDestroy {
   }
 
   /**
-   * Cập nhật phụ đề hiện tại
+   * Cập nhật phụ đề hiện tại và trigger progressive translation
    */
   private updateCurrentTranscript(currentTime: number): void {
     const items = this.transcript();
@@ -479,6 +614,12 @@ export class VideoPlayerComponent implements OnDestroy {
     
     if (index !== -1 && index !== this.currentTranscriptIndex()) {
       this.currentTranscriptIndex.set(index);
+      
+      // Kiểm tra xem có cần dịch batch tiếp theo không
+      // Khi đọc được câu thứ 10, 20, 30... dịch thêm 10 câu tiếp
+      if (index > 0 && index % 10 === 0 && index > this.lastTranslatedIndex) {
+        this.translateNextBatch();
+      }
     }
   }
 
@@ -547,18 +688,37 @@ export class VideoPlayerComponent implements OnDestroy {
     const trans = this.translation();
     if (!trans) return;
 
-    await this.vocabularyService.saveVocabulary({
-      word: this.selectedWord(),
-      meaning: trans.meaning,
-      grammarNote: trans.grammar_note,
-      examples: trans.examples,
-      contextSentence: this.selectedContext(),
-      videoId: this.videoId()!,
-      timestamp: this.player?.getCurrentTime() || 0,
-      language: this.selectedLanguage as any,
-    });
+    try {
+      // Lấy timestamp hiện tại từ video player
+      let timestamp = 0;
+      try {
+        if (this.player && typeof this.player.getCurrentTime === 'function') {
+          timestamp = this.player.getCurrentTime();
+        }
+      } catch (e) {
+        console.warn('Không thể lấy timestamp từ video player:', e);
+      }
 
-    alert('✓ Đã lưu từ vựng!');
+      await this.vocabularyService.saveVocabulary({
+        word: this.selectedWord(),
+        meaning: trans.meaning,
+        grammarNote: trans.grammar_note,
+        examples: trans.examples,
+        contextSentence: this.selectedContext(),
+        videoId: this.videoId()!,
+        timestamp: timestamp,
+        language: this.selectedLanguage as any,
+      });
+
+      console.log('✓ Đã lưu từ vựng:', this.selectedWord());
+      alert('✓ Đã lưu từ vựng!');
+      
+      // Force update UI
+      this.closeTranslation();
+    } catch (error) {
+      console.error('Lỗi khi lưu từ vựng:', error);
+      alert('✗ Lỗi khi lưu từ vựng: ' + error);
+    }
   }
 
   /**
@@ -578,5 +738,92 @@ export class VideoPlayerComponent implements OnDestroy {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Dịch 20 câu đầu tiên
+   */
+  private async translateInitialBatch(): Promise<void> {
+    const items = this.transcript();
+    const batchSize = Math.min(this.INITIAL_BATCH, items.length);
+    
+    console.log(`🌐 Bắt đầu dịch ${batchSize} câu đầu tiên...`);
+    
+    for (let i = 0; i < batchSize; i++) {
+      await this.translateTranscriptItem(i, items[i].text);
+      
+      // Delay 300ms giữa các request
+      if (i < batchSize - 1) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    }
+    
+    this.lastTranslatedIndex = batchSize - 1;
+    console.log(`✅ Đã dịch xong ${batchSize} câu đầu tiên!`);
+  }
+
+  /**
+   * Dịch batch tiếp theo (10 câu)
+   */
+  private async translateNextBatch(): Promise<void> {
+    const items = this.transcript();
+    const startIndex = this.lastTranslatedIndex + 1;
+    const endIndex = Math.min(startIndex + this.PROGRESSIVE_BATCH, items.length);
+    
+    if (startIndex >= items.length) {
+      return; // Đã dịch hết
+    }
+    
+    console.log(`🌐 Dịch batch tiếp theo: từ ${startIndex} đến ${endIndex - 1}`);
+    
+    for (let i = startIndex; i < endIndex; i++) {
+      await this.translateTranscriptItem(i, items[i].text);
+      
+      // Delay 300ms giữa các request
+      if (i < endIndex - 1) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    }
+    
+    this.lastTranslatedIndex = endIndex - 1;
+    console.log(`✅ Đã dịch xong batch đến câu ${endIndex - 1}`);
+  }
+
+  /**
+   * Dịch transcript item
+   */
+  private async translateTranscriptItem(index: number, text: string): Promise<void> {
+    // Nếu đã có bản dịch hoặc đang dịch thì bỏ qua
+    if (this.transcriptTranslations().has(index) || this.translatingItems.has(index)) {
+      return;
+    }
+
+    // Đánh dấu đang dịch
+    this.translatingItems.add(index);
+
+    try {
+      // Tạo prompt đơn giản để dịch
+      const prompt = `Dịch câu sau sang tiếng Việt (chỉ trả về bản dịch, không giải thích):
+"${text}"
+
+Bản dịch:`;
+
+      const response = await this.apiService.askAI(prompt).toPromise();
+      
+      if (response && response.success) {
+        // Lưu bản dịch
+        const translations = this.transcriptTranslations();
+        translations.set(index, response.response.trim());
+        this.transcriptTranslations.set(new Map(translations));
+      }
+    } catch (error) {
+      console.error(`Lỗi khi dịch transcript #${index}:`, error);
+      // Set bản dịch lỗi để không retry
+      const translations = this.transcriptTranslations();
+      translations.set(index, '[Lỗi dịch]');
+      this.transcriptTranslations.set(new Map(translations));
+    } finally {
+      this.translatingItems.delete(index);
+    }
   }
 }

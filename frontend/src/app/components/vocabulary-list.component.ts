@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VocabularyService } from '../services/vocabulary.service';
@@ -35,9 +35,9 @@ import { Vocabulary } from '../models/vocabulary.model';
           <input
             type="text"
             class="input"
-            [(ngModel)]="searchQuery"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
             placeholder="🔍 Tìm kiếm từ vựng..."
-            (input)="onSearch()"
           />
         </div>
 
@@ -59,37 +59,70 @@ import { Vocabulary } from '../models/vocabulary.model';
             <span class="stat-label">🇯🇵 日本語:</span>
             <span class="stat-value">{{ wordsByLanguage('ja') }}</span>
           </div>
+          <div class="stat-item">
+            <span class="stat-label">🇰🇷 한국어:</span>
+            <span class="stat-value">{{ wordsByLanguage('ko') }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">🇫🇷 Français:</span>
+            <span class="stat-value">{{ wordsByLanguage('fr') }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">🇩🇪 Deutsch:</span>
+            <span class="stat-value">{{ wordsByLanguage('de') }}</span>
+          </div>
         </div>
 
         <!-- Filter -->
         <div class="filter mt-2">
           <button
             class="filter-btn"
-            [class.active]="filterLanguage === 'all'"
+            [class.active]="filterLanguage() === 'all'"
             (click)="setFilter('all')"
           >
             Tất cả
           </button>
           <button
             class="filter-btn"
-            [class.active]="filterLanguage === 'en'"
+            [class.active]="filterLanguage() === 'en'"
             (click)="setFilter('en')"
           >
             🇬🇧 English
           </button>
           <button
             class="filter-btn"
-            [class.active]="filterLanguage === 'zh'"
+            [class.active]="filterLanguage() === 'zh'"
             (click)="setFilter('zh')"
           >
             🇨🇳 中文
           </button>
           <button
             class="filter-btn"
-            [class.active]="filterLanguage === 'ja'"
+            [class.active]="filterLanguage() === 'ja'"
             (click)="setFilter('ja')"
           >
             🇯🇵 日本語
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="filterLanguage() === 'ko'"
+            (click)="setFilter('ko')"
+          >
+            🇰🇷 한국어
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="filterLanguage() === 'fr'"
+            (click)="setFilter('fr')"
+          >
+            🇫🇷 Français
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="filterLanguage() === 'de'"
+            (click)="setFilter('de')"
+          >
+            🇩🇪 Deutsch
           </button>
         </div>
 
@@ -364,23 +397,28 @@ import { Vocabulary } from '../models/vocabulary.model';
   `],
 })
 export class VocabularyListComponent {
-  searchQuery = '';
-  filterLanguage: 'all' | 'en' | 'zh' | 'ja' = 'all';
+  searchQuery = signal('');
+  filterLanguage = signal<'all' | 'en' | 'zh' | 'ja' | 'ko' | 'fr' | 'de'>('all');
 
-  constructor(public vocabularyService: VocabularyService) {}
+  constructor(public vocabularyService: VocabularyService) {
+    // Reload data mỗi khi component được tạo
+    this.vocabularyService.loadVocabularies();
+  }
 
   // Computed signals
   filteredVocabularies = computed(() => {
     let vocabs = this.vocabularyService.vocabularies();
+    const filter = this.filterLanguage(); // Đọc signal
+    const search = this.searchQuery(); // Đọc signal
 
     // Filter by language
-    if (this.filterLanguage !== 'all') {
-      vocabs = vocabs.filter(v => v.language === this.filterLanguage);
+    if (filter !== 'all') {
+      vocabs = vocabs.filter(v => v.language === filter);
     }
 
     // Filter by search query
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
+    if (search) {
+      const query = search.toLowerCase();
       vocabs = vocabs.filter(
         v => v.word.toLowerCase().includes(query) ||
              v.meaning.toLowerCase().includes(query)
@@ -392,16 +430,17 @@ export class VocabularyListComponent {
 
   totalWords = computed(() => this.vocabularyService.vocabularies().length);
 
-  wordsByLanguage(lang: 'en' | 'zh' | 'ja'): number {
+  wordsByLanguage(lang: 'en' | 'zh' | 'ja' | 'ko' | 'fr' | 'de'): number {
     return this.vocabularyService.vocabularies().filter(v => v.language === lang).length;
   }
 
   onSearch(): void {
-    // Trigger recomputation
+    // Signal sẽ tự động trigger recomputation
   }
 
-  setFilter(lang: 'all' | 'en' | 'zh' | 'ja'): void {
-    this.filterLanguage = lang;
+  setFilter(lang: 'all' | 'en' | 'zh' | 'ja' | 'ko' | 'fr' | 'de'): void {
+    console.log('🔍 Đổi filter sang:', lang);
+    this.filterLanguage.set(lang);
   }
 
   getLanguageLabel(lang: string): string {
@@ -409,6 +448,9 @@ export class VocabularyListComponent {
       en: '🇬🇧 EN',
       zh: '🇨🇳 ZH',
       ja: '🇯🇵 JA',
+      ko: '🇰🇷 KO',
+      fr: '🇫🇷 FR',
+      de: '🇩🇪 DE',
     };
     return labels[lang as keyof typeof labels] || lang;
   }

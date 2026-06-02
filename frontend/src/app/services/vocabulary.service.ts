@@ -23,6 +23,7 @@ export class VocabularyService {
     this.isLoading.set(true);
     try {
       const data = await localforage.getItem<Vocabulary[]>(this.STORAGE_KEY);
+      console.log('📖 Load từ vựng từ storage:', data?.length || 0, 'từ');
       this.vocabularies.set(data || []);
     } catch (error) {
       console.error('Lỗi khi load từ vựng:', error);
@@ -42,11 +43,19 @@ export class VocabularyService {
       createdAt: Date.now(),
     };
 
+    console.log('💾 Đang lưu từ vựng:', newVocab);
+
     const current = this.vocabularies();
     const updated = [newVocab, ...current];
     
     await localforage.setItem(this.STORAGE_KEY, updated);
     this.vocabularies.set(updated);
+    
+    console.log('✅ Đã lưu! Tổng số từ:', updated.length);
+    
+    // Verify data was saved
+    const saved = await localforage.getItem<Vocabulary[]>(this.STORAGE_KEY);
+    console.log('🔍 Kiểm tra lại storage:', saved?.length, 'từ');
   }
 
   /**

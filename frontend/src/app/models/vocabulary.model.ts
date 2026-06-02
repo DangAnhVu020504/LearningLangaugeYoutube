@@ -10,7 +10,7 @@ export interface Vocabulary {
   contextSentence: string;
   videoId: string;
   timestamp: number;  // Thời điểm trong video (giây)
-  language: 'en' | 'zh' | 'ja';
+  language: 'en' | 'zh' | 'ja' | 'ko' | 'fr' | 'de';
   createdAt: number;  // Unix timestamp
 }
 

@@ -24,6 +24,9 @@ export class TranslateService {
       en: 'tiếng Anh',
       zh: 'tiếng Trung',
       ja: 'tiếng Nhật',
+      ko: 'tiếng Hàn',
+      fr: 'tiếng Pháp',
+      de: 'tiếng Đức',
     };
 
     const prompt = `Bạn là một giáo viên ${languageNames[language]} chuyên nghiệp.
@@ -81,6 +84,8 @@ Lưu ý:
     const languageNames = {
       zh: 'tiếng Trung',
       ja: 'tiếng Nhật',
+      ko: 'tiếng Hàn',
+      de: 'tiếng Đức',
     };
 
     const prompt = `Phân tách câu ${languageNames[language]} sau thành các từ riêng biệt:

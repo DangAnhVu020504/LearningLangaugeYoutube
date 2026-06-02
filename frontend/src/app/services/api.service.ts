@@ -44,4 +44,14 @@ export class ApiService {
       language,
     });
   }
+
+  /**
+   * Gọi AI chat API
+   */
+  askAI(message: string, context?: string): Observable<{ success: boolean; response: string }> {
+    return this.http.post<{ success: boolean; response: string }>(
+      `${this.API_URL}/ai-chat`,
+      { message, context }
+    );
+  }
 }

@@ -2,11 +2,12 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VideoPlayerComponent } from './components/video-player.component';
 import { VocabularyListComponent } from './components/vocabulary-list.component';
+import { AiChatComponent } from './components/ai-chat.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, VideoPlayerComponent, VocabularyListComponent],
+  imports: [CommonModule, VideoPlayerComponent, VocabularyListComponent, AiChatComponent],
   template: `
     <div class="app">
       <!-- Header -->
@@ -39,11 +40,12 @@ import { VocabularyListComponent } from './components/vocabulary-list.component'
 
       <!-- Content -->
       <main class="main">
-        @if (currentTab() === 'video') {
+        <div [style.display]="currentTab() === 'video' ? 'block' : 'none'">
           <app-video-player />
-        } @else {
+        </div>
+        <div [style.display]="currentTab() === 'vocabulary' ? 'block' : 'none'">
           <app-vocabulary-list />
-        }
+        </div>
       </main>
 
       <!-- Footer -->
@@ -53,10 +55,13 @@ import { VocabularyListComponent } from './components/vocabulary-list.component'
             Made with ❤️ using Angular + NestJS
           </p>
           <p class="text-secondary">
-            Hỗ trợ: 🇬🇧 English | 🇨🇳 中文 | 🇯🇵 日本語
+            Hỗ trợ: 🇬🇧 English | 🇨🇳 中文 | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇫🇷 Français | 🇩🇪 Deutsch
           </p>
         </div>
       </footer>
+
+      <!-- AI Chat Assistant -->
+      <app-ai-chat />
     </div>
   `,
   styles: [`
