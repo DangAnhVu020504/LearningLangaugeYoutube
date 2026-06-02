@@ -1,74 +1,226 @@
-# Language Learning App - Học Ngoại Ngữ Qua Video YouTube
+# 🎓 Language Learning App - Version 3.0
 
-Ứng dụng web học ngoại ngữ cho phép xem video YouTube với phụ đề đồng bộ, tra từ theo ngữ cảnh và lưu từ vựng.
+Ứng dụng học ngoại ngữ qua video YouTube với AI hỗ trợ.
 
-## 🚀 CHƯƠNG TRÌNH ĐÃ KHỞI ĐỘNG!
+## ✨ Tính năng
 
-### ✅ Backend đang chạy tại: http://localhost:3000/api
+### 🌍 Hỗ trợ 6 ngôn ngữ
+- 🇬🇧 English
+- 🇨🇳 中文 (Chinese)
+- 🇯🇵 日本語 (Japanese)
+- 🇰🇷 한국어 (Korean)
+- 🇫🇷 Français (French)
+- 🇩🇪 Deutsch (German)
 
-### 🎯 Cách sử dụng ngay:
+### 🎥 Video Player
+- Load video từ YouTube
+- Hiển thị phụ đề đồng bộ
+- Click từ để dịch chi tiết
+- Layout giống YouTube
 
-1. **Mở file test:** `frontend/test.html` trong trình duyệt
-2. **Test API:** Click các nút để test Transcript và Translate API
-3. **Thêm API Key:** Mở `backend/.env` và thêm OPENAI_API_KEY hoặc GEMINI_API_KEY
+### 🌐 Dịch phụ đề thông minh
+- Progressive translation (dịch dần theo tiến độ xem)
+- Dịch 20 câu đầu ngay lập tức
+- Tự động dịch thêm khi xem tiếp
+- Hiển thị bản dịch tiếng Việt cho mọi phụ đề
 
-📖 **Đọc chi tiết:** [QUICK_START.md](QUICK_START.md)
+### 📚 Sổ tay từ vựng
+- Lưu từ vựng với ngữ cảnh
+- Lọc theo ngôn ngữ
+- Tìm kiếm từ vựng
+- Export/Import JSON
+- Xem lại video tại thời điểm từ xuất hiện
+
+### 🤖 AI Chatbot
+- Trợ lý học ngoại ngữ thông minh
+- Giải thích ngữ pháp
+- Dịch và giải nghĩa từ
+- Tư vấn phương pháp học
+- Luyện tập hội thoại
+
+## 🚀 Quick Start (Local)
+
+### Prerequisites
+- Node.js v18+
+- npm hoặc yarn
+
+### Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Thêm API key vào .env: OPENAI_API_KEY hoặc GEMINI_API_KEY
+npm run start:dev
+```
+
+Backend chạy tại: http://localhost:3000/api
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Frontend chạy tại: http://localhost:4200
+
+## 🌐 Deploy lên Cloud (Public URL)
+
+### Khuyên dùng: Vercel + Render (Miễn phí)
+
+**1. Deploy Backend lên Render:**
+- Truy cập: https://render.com
+- New > Web Service
+- Connect GitHub repo
+- Root Directory: `backend`
+- Build: `npm install`
+- Start: `npm run start:prod`
+- Add env vars: `OPENAI_API_KEY`, `LLM_PROVIDER=openai`
+
+**2. Deploy Frontend lên Vercel:**
+- Truy cập: https://vercel.com
+- Import Git repo
+- Root Directory: `frontend`
+- Framework: Angular
+- Build: `npm run build`
+- Env var: `API_URL=https://your-backend.onrender.com`
+
+Chi tiết xem: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
+## 📱 Sử dụng trên thiết bị khác
+
+Sau khi deploy:
+1. Copy URL từ Vercel (ví dụ: `https://your-app.vercel.app`)
+2. Mở trên bất kỳ thiết bị nào (điện thoại, tablet, laptop khác)
+3. Sử dụng ngay không cần cài đặt!
+
+## 🛠️ Tech Stack
+
+### Frontend
+- Angular 17
+- TypeScript
+- Signals (Reactive State)
+- LocalForage (Offline Storage)
+- YouTube IFrame API
+
+### Backend
+- NestJS
+- TypeScript
+- OpenAI / Gemini AI
+- YouTube Transcript API
+
+## 📦 Project Structure
+
+```
+ChiHaiDaiKa/
+├── backend/
+│   ├── src/
+│   │   ├── ai-chat/         # AI chatbot module
+│   │   ├── transcript/      # YouTube transcript module
+│   │   ├── translate/       # Translation & LLM module
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   │   ├── video-player.component.ts
+│   │   │   │   ├── vocabulary-list.component.ts
+│   │   │   │   └── ai-chat.component.ts
+│   │   │   ├── services/
+│   │   │   ├── models/
+│   │   │   └── app.component.ts
+│   │   └── index.html
+│   └── package.json
+│
+└── README.md
+```
+
+## 🔑 Environment Variables
+
+### Backend (.env)
+
+```env
+# LLM Provider (openai hoặc gemini)
+LLM_PROVIDER=openai
+
+# OpenAI
+OPENAI_API_KEY=sk-proj-...
+
+# Gemini (alternative)
+GEMINI_API_KEY=AIza...
+
+# Server
+PORT=3000
+FRONTEND_URL=http://localhost:4200
+```
+
+### Frontend (environment.ts)
+
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000/api'
+};
+```
+
+## 📖 API Documentation
+
+### GET /api/transcript
+Lấy phụ đề từ YouTube video
+
+**Query params:**
+- `videoId`: YouTube video ID
+- `lang`: Language code (en, zh, ja, ko, fr, de)
+
+### POST /api/translate
+Dịch từ theo ngữ cảnh
+
+**Body:**
+```json
+{
+  "word": "hello",
+  "context": "Hello, how are you?",
+  "language": "en"
+}
+```
+
+### POST /api/ai-chat
+Hỏi AI chatbot
+
+**Body:**
+```json
+{
+  "message": "Giải thích cách dùng present perfect",
+  "context": "optional"
+}
+```
+
+## 🤝 Contributing
+
+1. Fork repo
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+## 📝 License
+
+MIT License
+
+## 👤 Author
+
+**Đặng Anh Vũ**
+- GitHub: [@DangAnhVu020504](https://github.com/DangAnhVu020504)
+
+## ⭐ Show your support
+
+Give a ⭐️ if this project helped you!
 
 ---
 
-## Tech Stack
-
-- **Frontend**: Angular 17+ (Standalone Components, Signals)
-- **Backend**: NestJS (API Proxy) - ✅ ĐANG CHẠY
-- **Storage**: Local Storage / IndexedDB
-- **APIs**: YouTube IFrame API, OpenAI/Gemini API
-
-## Tính năng chính
-
-1. ✅ Nhập link YouTube và phát video
-2. ✅ Hiển thị phụ đề đồng bộ với video
-3. ✅ Click vào từ để tra nghĩa theo ngữ cảnh
-4. ✅ Phát âm từ vựng bằng Web Speech API
-5. ✅ Lưu từ vựng vào Local Storage
-6. ✅ Quản lý sổ tay từ vựng
-
-## 🧪 Test API ngay
-
-### Test Transcript (Không cần API Key):
-```
-http://localhost:3000/api/transcript?videoId=dQw4w9WgXcQ&lang=en
-```
-
-### Test với HTML:
-Mở file `frontend/test.html` trong trình duyệt
-
-## ⚙️ Cấu hình API Key
-
-Mở file `backend/.env` và thêm:
-
-```env
-OPENAI_API_KEY=sk-your-key-here
-# hoặc
-GEMINI_API_KEY=your-key-here
-
-PORT=3000
-FRONTEND_URL=http://localhost:4200
-LLM_PROVIDER=openai
-```
-
-**Lấy API Key:**
-- OpenAI: https://platform.openai.com/api-keys
-- Gemini: https://makersuite.google.com/app/apikey
-
-## 📚 Tài liệu
-
-- [QUICK_START.md](QUICK_START.md) - Hướng dẫn nhanh
-- [SETUP_GUIDE.md](SETUP_GUIDE.md) - Hướng dẫn cài đặt chi tiết
-- [TECHNICAL_DOCS.md](TECHNICAL_DOCS.md) - Tài liệu kỹ thuật
-- [SUMMARY.md](SUMMARY.md) - Tóm tắt dự án
-
-## Hỗ trợ ngôn ngữ
-
-- 🇬🇧 Tiếng Anh
-- 🇨🇳 Tiếng Trung
-- 🇯🇵 Tiếng Nhật
+Made with ❤️ using Angular + NestJS

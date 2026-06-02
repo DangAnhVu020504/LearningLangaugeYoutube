@@ -5,9 +5,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   // Enable CORS để Frontend có thể gọi API
+  const allowedOrigins = [
+    'http://localhost:4200',
+    'https://learninglangaugeyoutube.onrender.com',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: true, // Cho phép tất cả origins (development only)
+    origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global prefix cho tất cả routes
@@ -16,6 +24,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Backend đang chạy tại: http://localhost:${port}/api`);
+  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')}`);
 }
 
 bootstrap();

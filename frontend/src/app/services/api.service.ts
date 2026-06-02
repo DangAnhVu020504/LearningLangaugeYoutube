@@ -7,7 +7,7 @@ import { TranscriptItem, TranslationResult } from '../models/vocabulary.model';
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = 'https://learninglangaugeyoutube.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 
