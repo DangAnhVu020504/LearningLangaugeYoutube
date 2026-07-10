@@ -9,6 +9,9 @@ async function bootstrap() {
     'http://localhost:4200',
     'https://learninglangaugeyoutube.onrender.com',
     process.env.FRONTEND_URL,
+    // Dev Tunnels URLs
+    /\.devtunnels\.ms$/,
+    /\.app\.github\.dev$/,
   ].filter(Boolean);
 
   app.enableCors({
